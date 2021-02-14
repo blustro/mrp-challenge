@@ -730,3 +730,15 @@ export const create = async (newUser: BaseUser): Promise<User> => {
 
   return Users[id];
 };
+
+export const update = async (id: number, userUpdate: BaseUser): Promise<User | null> => {
+  const user = await find(id);
+
+  if (!user) {
+    return null;
+  }
+
+  Users[id] = { id, ...userUpdate };
+
+  return Users[id];
+};
