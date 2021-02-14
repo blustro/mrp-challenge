@@ -717,3 +717,5 @@ let Users: Users = {
  */
 
 export const findAll = async (): Promise<User[]> => Object.values(Users);
+
+export const find = async (id: number): Promise<User> => Users[id];
