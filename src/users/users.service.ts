@@ -742,3 +742,13 @@ export const update = async (id: number, userUpdate: BaseUser): Promise<User | n
 
   return Users[id];
 };
+
+export const remove = async (id: number): Promise<null | void> => {
+  const user = await find(id);
+
+  if (!id) {
+    return null;
+  }
+
+  delete Users[id];
+};
