@@ -719,3 +719,14 @@ let Users: Users = {
 export const findAll = async (): Promise<User[]> => Object.values(Users);
 
 export const find = async (id: number): Promise<User> => Users[id];
+
+export const create = async (newUser: BaseUser): Promise<User> => {
+  const id = new Date().valueOf();
+
+  Users[id] = {
+    id,
+    ...newUser,
+  };
+
+  return Users[id];
+};
