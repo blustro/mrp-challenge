@@ -10,7 +10,7 @@ export interface Address {
   street: string;
   city: string;
   state: string;
-  zipCode: number;
+  zipCode: string;
   country: string;
 }
 
