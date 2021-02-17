@@ -24,15 +24,23 @@ usersRouter.get('/', async (req: Request, res: Response) => {
   try {
     const users: User[] = await UserService.findAll();
 
-    if (getEmail) {
-      try {
-        const matchingEmail = users.filter((user) => user.email === getEmail);
-        console.log(users);
+    if (req.query) {
+      if (getEmail) {
+        try {
+          const matchingEmail = users.filter((user) => user.email === getEmail);
+          if (matchingEmail == []) {
+            res.status(200).send('user not found');
+          }
 
-        res.status(200).send(matchingEmail);
-      } catch (e) {
-        res.status(500).send(e.message);
+          res.status(200).send(matchingEmail);
+        } catch (e) {
+          res.status(500).send(e.message);
+        }
+      } else if (getEmail == '') {
+        res.status(200).send('Query is empty.');
       }
+    } else if (req.query != 'email') {
+      res.status(200).send('Query not found.');
     }
 
     res.status(200).send(users);
