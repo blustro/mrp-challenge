@@ -5,7 +5,6 @@
 import express, { Request, Response } from 'express';
 import * as UserService from './users.service';
 import { BaseUser, User } from './user.interface';
-import { Users } from './users.interface';
 
 /**
  * Router Definition
@@ -18,14 +17,31 @@ export const usersRouter = express.Router();
  */
 
 // GET users
-
 usersRouter.get('/', async (req: Request, res: Response) => {
   const users: User[] = await UserService.findAll();
 
-  try {
-    res.status(200).send(users);
-  } catch (e) {
-    res.status(500).send(e.message);
+  if (req.query.page && req.query.limit) {
+    let limit = Math.floor(Number(req.query.limit));
+    let page = Math.floor(Number(req.query.page));
+
+    const pageCount = Math.ceil(users.length / limit);
+    if (!page) {
+      page = 1;
+    }
+    if (page > pageCount) {
+      page = pageCount;
+    }
+    res.json({
+      page: page,
+      pageCount: pageCount,
+      users: users.slice(page * limit - limit, page * limit),
+    });
+  } else {
+    try {
+      res.status(200).send(users);
+    } catch (e) {
+      res.status(500).send(e.message);
+    }
   }
 });
 
@@ -34,18 +50,18 @@ usersRouter.get('/match', async (req: Request, res: Response) => {
   const getEmail = req.query.email;
   const users: User[] = await UserService.findAll();
 
-  try {
-    if (getEmail) {
+  if (getEmail) {
+    try {
       const matchingEmail = users.filter((user) => user.email === getEmail);
 
       res.status(200).send(matchingEmail);
-    } else if (getEmail == '') {
-      res.status(200).send('Query is empty.');
+    } catch (e) {
+      res.status(500).send(e.message);
     }
-    res.status(200).send(users);
-  } catch (e) {
-    res.status(500).send(e.message);
+  } else if (getEmail == '') {
+    res.status(200).send('Query is empty.');
   }
+  res.status(200).send(users);
 });
 
 // GET users/sort
