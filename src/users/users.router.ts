@@ -23,6 +23,66 @@ usersRouter.get('/', async (req: Request, res: Response) => {
   const getEmail = req.query.email;
   const users: User[] = await UserService.findAll();
 
+  // function compare(a: User, b: User) {
+  //   if (a.name < b.name) {
+  //     return -1;
+  //   }
+  //   if (a.name > b.name) {
+  //     return 1;
+  //   }
+  //   return 0;
+  // }
+
+  try {
+    if (req.query) {
+      // for (const key in req.query) {
+      //   const orderByName = req.query.orderBy;
+      //   const sortDirection = req.query.sortDirection;
+      //   if (orderByName == 'name' && sortDirection == 'asc') {
+      //     res.send(users.sort(compare));
+      //   }
+      //   if (orderByName == 'name' && sortDirection == 'desc') {
+      //     res.send(users.sort(compare).reverse());
+      //   } else {
+      //     res.send('Query param not valid');
+      //   }
+      // }
+      // if (getEmail) {
+      //   const matchingEmail = users.filter((user) => user.email === getEmail);
+      //   res.status(200).send(matchingEmail);
+      // } else if (getEmail == '') {
+      //   res.status(200).send('Query is empty.');
+      // }
+    }
+    res.status(200).send(users);
+  } catch (e) {
+    res.status(500).send(e.message);
+  }
+});
+
+// GET users/match
+usersRouter.get('/match', async (req: Request, res: Response) => {
+  const getEmail = req.query.email;
+  const users: User[] = await UserService.findAll();
+
+  try {
+    if (getEmail) {
+      const matchingEmail = users.filter((user) => user.email === getEmail);
+
+      res.status(200).send(matchingEmail);
+    } else if (getEmail == '') {
+      res.status(200).send('Query is empty.');
+    }
+    res.status(200).send(users);
+  } catch (e) {
+    res.status(500).send(e.message);
+  }
+});
+
+// GET users/sort
+usersRouter.get('/sort', async (req: Request, res: Response) => {
+  const users: User[] = await UserService.findAll();
+
   function compare(a: User, b: User) {
     if (a.name < b.name) {
       return -1;
@@ -34,26 +94,16 @@ usersRouter.get('/', async (req: Request, res: Response) => {
   }
 
   try {
-    if (req.query) {
-      for (const key in req.query) {
-        const orderByName = req.query.orderBy;
-        const sortDirection = req.query.sortDirection;
-        if (orderByName == 'name' && sortDirection == 'asc') {
-          res.send(users.sort(compare));
-        }
-        if (orderByName == 'name' && sortDirection == 'desc') {
-          res.send(users.sort(compare).reverse());
-        } else {
-          res.send('Query param not valid');
-        }
+    for (const key in req.query) {
+      const orderBy = req.query.orderBy;
+      const sortDirection = req.query.sortDirection;
+      if (orderBy == 'name' && sortDirection == 'asc') {
+        res.send(users.sort(compare));
       }
-
-      if (getEmail) {
-        const matchingEmail = users.filter((user) => user.email === getEmail);
-
-        res.status(200).send(matchingEmail);
-      } else if (getEmail == '') {
-        res.status(200).send('Query is empty.');
+      if (orderBy == 'name' && sortDirection == 'desc') {
+        res.send(users.sort(compare).reverse());
+      } else {
+        res.send('Query param not valid');
       }
     }
     res.status(200).send(users);
@@ -63,7 +113,6 @@ usersRouter.get('/', async (req: Request, res: Response) => {
 });
 
 // GET users/:id
-
 usersRouter.get('/:id', async (req: Request, res: Response) => {
   const id: number = parseInt(req.params.id, 10);
 
