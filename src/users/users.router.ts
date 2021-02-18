@@ -5,6 +5,7 @@
 import express, { Request, Response } from 'express';
 import * as UserService from './users.service';
 import { BaseUser, User } from './user.interface';
+import { Users } from './users.interface';
 
 /**
  * Router Definition
@@ -20,29 +21,41 @@ export const usersRouter = express.Router();
 
 usersRouter.get('/', async (req: Request, res: Response) => {
   const getEmail = req.query.email;
+  const users: User[] = await UserService.findAll();
+
+  function compare(a: User, b: User) {
+    if (a.name < b.name) {
+      return -1;
+    }
+    if (a.name > b.name) {
+      return 1;
+    }
+    return 0;
+  }
 
   try {
-    const users: User[] = await UserService.findAll();
-
     if (req.query) {
-      if (getEmail) {
-        try {
-          const matchingEmail = users.filter((user) => user.email === getEmail);
-          if (matchingEmail == []) {
-            res.status(200).send('user not found');
-          }
-
-          res.status(200).send(matchingEmail);
-        } catch (e) {
-          res.status(500).send(e.message);
+      for (const key in req.query) {
+        const orderByName = req.query.orderBy;
+        const sortDirection = req.query.sortDirection;
+        if (orderByName == 'name' && sortDirection == 'asc') {
+          res.send(users.sort(compare));
         }
+        if (orderByName == 'name' && sortDirection == 'desc') {
+          res.send(users.sort(compare).reverse());
+        } else {
+          res.send('Query param not valid');
+        }
+      }
+
+      if (getEmail) {
+        const matchingEmail = users.filter((user) => user.email === getEmail);
+
+        res.status(200).send(matchingEmail);
       } else if (getEmail == '') {
         res.status(200).send('Query is empty.');
       }
-    } else if (req.query != 'email') {
-      res.status(200).send('Query not found.');
     }
-
     res.status(200).send(users);
   } catch (e) {
     res.status(500).send(e.message);
